@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#SBATCH --job-name=finetune_unsloth
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=2
+#SBATCH --time=12:00:00
+
+
+# Activate Python virtual environment
+source venv/bin/activate
+
+# Set HuggingFace cache directory
+export HF_HOME=/scratch-shared/$USER/.cache_dir/
+
+# Run finetuning
+python finetune.py \
+    --pretrained_model_name_or_path unsloth/Qwen3-14b \
+    --data_dir train_input_900_masked.jsonl \
+    --output_dir ./finetuned_model_final123 \
+    --per_device_train_batch_size 1 \
+    --gradient_accumulation_steps 8 \
+    --learning_rate 2e-5 \
+    --num_train_epochs 3 \
+    --logging_steps 10 \
+    --save_steps 400 \
+    --save_total_limit 2 \
+    --max_seq_length 16000 \
+    --bf16 True \
+    --remove_unused_columns False

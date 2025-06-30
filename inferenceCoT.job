@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#SBATCH --job-name=inference_unsloth
+#SBATCH --partition=gpu_h100
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-node=1
+#SBATCH --cpus-per-task=2
+#SBATCH --time=4:00:00
+
+# Activate your Python virtual environment
+source venv/bin/activate
+
+# Set HuggingFace cache location
+export HF_HOME=/scratch-shared/$USER/.cache_dir/
+
+python inferenceCoT.py \
+  --model_name unsloth/Qwen3-32b \
+  --input_jsonl test_input_100.jsonl \
+  --output_jsonl aresults_CoT_coord-32b.jsonl \
+  --masking_counts 1 3 5\
+  --batch_size 1 \
+  --max_seq_length 32000 \
+  --load_in_4bit False \
+  --finetune False \
+  --mode longshot \
+  --include_masked_holes True\
+  --output_format hole_and_coordinates
